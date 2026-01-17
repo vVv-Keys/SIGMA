@@ -1,0 +1,37 @@
+title: Suspicious MSBuild Remote Task Execution
+id: 8ae1e56f-49d7-42b1-a5ce-5ab6e4e741a0
+status: experimental
+description: Detects msbuild.exe executing project files from remote locations or using inline tasks which may indicate code execution or lateral movement.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.mitre.org/techniques/T1127/001/
+  - https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\msbuild.exe'
+      - '\MSBuild.exe'
+  selection_remote_project:
+    CommandLine|contains:
+      - 'http://'
+      - 'https://'
+      - '\\'
+      - '.csproj'
+      - '.vbproj'
+  selection_inline:
+    CommandLine|contains:
+      - '<Task'
+      - '/target:'
+      - '/t:'
+  condition: selection_image and (selection_remote_project or selection_inline)
+falsepositives:
+  - Legitimate builds of projects located on network shares or remote repositories
+level: medium
+tags:
+  - attack.execution
+  - attack.defense_evasion
+  - attack.t1127.001
