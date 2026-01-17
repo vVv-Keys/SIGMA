@@ -1,0 +1,35 @@
+title: Suspicious Certreq Certificate Enrollment
+id: d72a7c90-836f-4e0e-83b3-f4a28231e6ba
+status: experimental
+description: Detects the use of certreq.exe to request or submit certificates from a remote Certification Authority, which may indicate credential theft or unauthorized certificate enrollment in Active Directory Certificate Services.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.mitre.org/techniques/T1550/004/
+  - https://learn.microsoft.com/windows-server/administration/windows-commands/certreq
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\\certreq.exe'
+      - '\\Certreq.exe'
+  selection_request:
+    CommandLine|contains:
+      - '-new'
+      - '-submit'
+  selection_remote:
+    CommandLine|contains:
+      - 'http://'
+      - 'https://'
+      - '\\\\'
+      - '-config'
+  condition: selection_image and selection_request and selection_remote
+falsepositives:
+  - Legitimate certificate enrollment in enterprise environments
+level: medium
+tags:
+  - attack.credential_access
+  - attack.t1550.004
+  - attack.lateral_movement
