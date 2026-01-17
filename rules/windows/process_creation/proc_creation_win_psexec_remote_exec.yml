@@ -1,0 +1,37 @@
+title: Suspicious PsExec Remote Execution
+id: 0ca8d76a-70e2-4ad9-b254-43a7dcfa0e0c
+status: experimental
+description: Detects Sysinternals PsExec (psexec.exe or psexec64.exe) used to execute commands on remote systems, which is often used for lateral movement.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.mitre.org/techniques/T1569/002/
+  - https://learn.microsoft.com/en-us/sysinternals/downloads/psexec
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\psexec.exe'
+      - '\PsExec.exe'
+      - '\psexec64.exe'
+      - '\PsExec64.exe'
+  selection_remote:
+    CommandLine|contains:
+      - '\\'
+  selection_flags:
+    CommandLine|contains:
+      - '-s'
+      - '-i'
+      - '-d'
+      - '-u'
+      - '-p'
+  condition: selection_image and selection_remote
+falsepositives:
+  - Legitimate remote administration using PsExec by IT staff
+level: medium
+tags:
+  - attack.execution
+  - attack.lateral_movement
+  - attack.t1569.002
