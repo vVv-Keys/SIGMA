@@ -1,0 +1,33 @@
+title: Suspicious Net Use Remote Share Mapping
+id: d4e5f6a9-cc91-4b79-8b41-bde546780123
+status: experimental
+description: Detects the use of net.exe to map network drives to remote shares using UNC paths. Attackers may leverage net use to stage files or move laterally.
+author: vVv-Keys
+date: 2026/01/17
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-use
+    - https://attack.mitre.org/techniques/T1021/002/
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_image:
+        Image|endswith:
+            - '\\net.exe'
+            - '\\net1.exe'
+    selection_command:
+        CommandLine|contains:
+            - ' use '
+            - '\\\\'
+    selection_user_flag:
+        CommandLine|contains:
+            - '/user'
+            - '/persistent'
+    condition: selection_image and selection_command
+falsepositives:
+    - Legitimate network share mapping by administrators or logon scripts
+level: medium
+tags:
+    - attack.lateral_movement
+    - attack.t1021.002
+    - attack.execution
