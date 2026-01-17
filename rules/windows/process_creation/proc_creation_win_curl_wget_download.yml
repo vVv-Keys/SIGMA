@@ -1,0 +1,32 @@
+title: Suspicious cURL or Wget Download Command
+id: 5a1d9e0b-5ea3-47d9-b1c1-7c0d3762c0b8
+status: experimental
+description: Detects usage of curl.exe or wget.exe on Windows to download files from remote hosts, which may indicate malicious file retrieval.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.T1105.org/T1105/T1105/
+  - https://curl.se/docs/manual.html
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\\curl.exe'
+      - '\\wget.exe'
+  selection_commandline:
+    CommandLine|contains:
+      - 'http://'
+      - 'https://'
+      - '-o '
+      - '-O '
+      - '--output-document'
+  condition: selection_image and selection_commandline
+falsepositives:
+  - System administrators or software updates downloading legitimate files
+level: medium
+tags:
+  - attack.command_and_control
+  - attack.defense_evasion
+  - attack.t1105
