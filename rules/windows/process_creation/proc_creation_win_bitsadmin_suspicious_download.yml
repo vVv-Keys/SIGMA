@@ -1,0 +1,34 @@
+title: Suspicious Bitsadmin File Download
+id: a7a63064-5483-4864-9b41-f1ff686a612c
+status: experimental
+description: Detects usage of bitsadmin.exe to download files from remote servers or schedule malicious downloads.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.mitre.org/techniques/T1197/
+  - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/bitsadmin
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_image:
+    Image|endswith:
+      - '\\bitsadmin.exe'
+      - '\\bitsadmin'
+  selection_commandline:
+    CommandLine|contains:
+      - '/transfer'
+      - '/download'
+      - '/addfile'
+      - '/create'
+      - 'http://'
+      - 'https://'
+      - '\\\\'
+  condition: selection_image and selection_commandline
+falsepositives:
+  - Legitimate system administration scripts
+level: medium
+tags:
+  - attack.command_and_control
+  - attack.t1197
+  - attack.execution
