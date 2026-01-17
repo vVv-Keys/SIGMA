@@ -1,0 +1,40 @@
+title: Suspicious Certutil Download/Encode Command
+id: e620d674-3b6e-42e1-9f06-ad8cc6cf05b3
+status: experimental
+description: Detects usage of certutil.exe to download remote files or encode/decode data. Attackers may abuse certutil with the urlcache, encode, or decode options to transfer or obfuscate payloads.
+author: vVv-Keys
+date: 2026/01/17
+references:
+    - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil
+    - https://attack.mitre.org/techniques/T1105/
+    - https://attack.mitre.org/techniques/T1140/
+logsource:
+    product: windows
+    category: process_creation
+detection:
+    selection_image:
+        Image|endswith: '\\certutil.exe'
+    selection_download:
+        CommandLine|contains:
+            - '/urlcache'
+            - '-urlcache'
+    selection_encode:
+        CommandLine|contains:
+            - '/encode'
+            - '-encode'
+            - '/decode'
+            - '-decode'
+    selection_remote:
+        CommandLine|contains:
+            - 'http://'
+            - 'https://'
+            - '\\\\'
+    condition: selection_image and (selection_download or selection_encode or selection_remote)
+falsepositives:
+    - Legitimate certificate operations and file downloads by administrators or system processes
+level: medium
+tags:
+    - attack.command_and_control
+    - attack.t1105
+    - attack.t1140
+    - attack.execution
