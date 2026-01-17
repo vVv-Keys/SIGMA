@@ -1,0 +1,38 @@
+title: Suspicious Domain Account Creation via Net User
+id: 97e7545d-d8f1-4b12-91fa-724f63a60391
+status: experimental
+description: Detects creation of new domain user accounts using net user /add commands or via New-ADUser.
+author: vVv-Keys
+date: 2026/01/17
+references:
+  - https://attack.mitre.org/techniques/T1136/002
+  - https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/net-user
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection_net_user:
+    CommandLine|contains|all:
+      - 'net'
+      - 'user'
+      - '/add'
+      - '/domain'
+  selection_net_group:
+    CommandLine|contains|all:
+      - 'net'
+      - 'group'
+      - '/add'
+      - '/domain'
+  selection_new_aduser:
+    Image|endswith: '\powershell.exe'
+    CommandLine|contains|all:
+      - 'New-ADUser'
+      - '-Name'
+  condition: selection_net_user or selection_net_group or selection_new_aduser
+falsepositives:
+  - Domain admin or automation tasks provisioning legitimate accounts
+level: high
+tags:
+  - attack.persistence
+  - attack.t1136.002
+  - car.2013-04-007
